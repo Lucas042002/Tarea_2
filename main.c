@@ -5,30 +5,41 @@
 #include "hashmap.h"
 #include "struct.h"
 
-
+//funcion para evolucion de pokemon
 void evolucionarPokemon(HashMap * mapaClaveNombre, HashMap *mapaClaveNombrePoke){
+  //inicializamos una cadena para obtener el id del 
+  //pokemon a evolucionar
   char *aux = malloc (sizeof(char));
   printf("Inserte id de Pokemon\n");
  	scanf("%s", aux);
   alm_pokemon *aComparar = firstMap(mapaClaveNombre);
-  
+  //debido a que no es necesario un mapaClaveID, lo buscamos a través de 
+  //firstMap y comparamos id.
   if (aComparar != NULL){
     while (aComparar != NULL ){
       if (strcmp(get_id(aComparar), aux)==0){
-        
+        //si encontramos la id: break
         break;
       }
+      //sino, nextMap
     aComparar = nextMap(mapaClaveNombre);
     }
   }
+  //si recorrimos todo el mapa y no encontramos coincidencias
+  //de id, quedando NULL nuestro aComparar
+  //significa que no existe el pokemon.
   if (aComparar == NULL) printf("Este pokemon no existe.\n");
   else{
+    //en otro caso, buscamos el nombre asociado a la id en
+    //mapaClaveNombrePoke el cual cuenta con los datos en Pokedex
     Pokedex *bComparar = searchMap(mapaClaveNombrePoke, get_nombreA(aComparar));
     int pc;
     int ps;
-    
+    //si encontramos el pokemon pero su evolucion siguiente no existe
+    //no puede ser evolucionado
     if (strcmp(get_evoNext(bComparar), "No tiene") == 0) printf("Este pokemon no tiene evolucion.\n");
     else{
+      //en otro caso copiaremos los datos de almacenamiento
         char* pc1 = malloc (sizeof(char));
         char* ps1 = malloc (sizeof(char));
         char *nombre = (char*) calloc(1000, sizeof(char));
@@ -36,31 +47,43 @@ void evolucionarPokemon(HashMap * mapaClaveNombre, HashMap *mapaClaveNombrePoke)
         char* id = (char*) calloc(1000, sizeof(char));
         char *PC = (char*) calloc(1000, sizeof(char));
         char *PS = (char*) calloc(1000, sizeof(char));
-        
+        //cambiamos el nombre actual por el de la evolucion
         strcpy(nombre, get_evoNext(bComparar));
+        //copiamos a la variable sexo el sexo actual
+        //para una correcta insercion
         strcpy(sexo, get_sexo(aComparar));
+        //copiamos a la variable id el id actual
         strcpy(id, get_id(aComparar));
+        //transformamos el pc y ps a int para poder aumentarlo
+        //en el porcentaje indicado 
         pc = (int) strtol(get_PC(aComparar), NULL, 10);
         ps=(int) strtol(get_PS(aComparar), NULL, 10);
         pc*=1.5;
         ps*=1.25;
+        //lo transformamos a cadena y se copia en pc1 y ps1
         sprintf(pc1,  "%d",pc);
         sprintf(ps1,  "%d",ps);
+        //copiamos las variables directamente a aComparar
         modPcPs(aComparar, pc1, ps1);
+        //copiamos a la variable ps y ps los actuales
+        //para una correcta insercion
         strcpy(PC, get_PC(aComparar));
         strcpy(PS, get_PS(aComparar));
-
+        //insertamos en un nuevo strcut almacenamiento para
+        //una correcta insercion
         alm_pokemon *alm = crearAlm(id,nombre,PC,PS,sexo);
+        //modificamos las existencias en el nombre de pokedex
         modExistencias(bComparar,get_existencias(bComparar)-1);
+        //eliminamos en almacenamiento el nodo
         eraseMap(mapaClaveNombre, get_nombreA(aComparar));
-        
-        insertMap(mapaClaveNombre, get_nombreA(alm), alm);     
+        //lo insertamos apropiadamente
+        insertMap(mapaClaveNombre, get_nombreA(alm), alm); 
+        //aumentamos la existencia con el nuevo nombre    
         bComparar = searchMap (mapaClaveNombrePoke,get_nombreA(alm));
         modExistencias(bComparar,get_existencias(bComparar)+1);
     }
   }
 }
-
 void liberarPoke (HashMap* mapaClaveNombre,  HashMap* mapaClaveNombrePoke){
   char* aux= malloc (sizeof(char));
 
