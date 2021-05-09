@@ -84,33 +84,41 @@ void evolucionarPokemon(HashMap * mapaClaveNombre, HashMap *mapaClaveNombrePoke)
     }
   }
 }
+//funcion para liberar pokemon
 void liberarPoke (HashMap* mapaClaveNombre,  HashMap* mapaClaveNombrePoke){
   char* aux= malloc (sizeof(char));
 
   printf("Ingrese ID de Pokemon a liberar:\n");
   scanf("%s", aux);
   alm_pokemon *aEncontrar = firstMap(mapaClaveNombre);
-
+//con un proceso similar a la anterior funcion
+//comparamos hasta encontrar id y posterior 
+//busqueda de nombre en pokedex
   while (aEncontrar!=NULL){
     if (strcmp(get_id(aEncontrar),aux) == 0){
       break;
     }
     aEncontrar = nextMap(mapaClaveNombre);
   }
+  
   if (aEncontrar!=NULL){
     Pokedex *bEncontrar = searchMap(mapaClaveNombrePoke, get_nombreA(aEncontrar));
     modExistencias(bEncontrar, get_existencias(bEncontrar)-1);
     if (strcmp(get_id(aEncontrar), aux)==0){
+      //al encontrarlo, le aplicamos eraseMap
       eraseMap(mapaClaveNombre,  get_nombreA(aEncontrar));
     }
     printf("Pokemon %s liberado con exito :D\n",  get_nombreA(aEncontrar));
   }
   else{
+    //si no fue encontrado en primer lugar, 
+    //enviamos mensaje que no existe
     printf("El pokemon ingresado no existe.\n");
   }
 
 }
-
+/*funcion que busca por tipo, de tener multiples tipos este pregunta por 1
+y luego pasa al siguiente hasta que se terminan la cantidad de tipos del pokemon */
 int compararTipo(char* aComparar, char *aux){
     char * aux2 = strtok(aComparar, " ");
     while (aux2!=NULL){
@@ -130,9 +138,9 @@ void buscarPokePorTipo (HashMap* mapaClaveNombre,  HashMap* mapaClaveNombrePoke)
   tipo[strlen(tipo)-1]=0;
   int entrada =0;
   Pokedex *aux = firstMap(mapaClaveNombrePoke);
-
-
+  /*a partir del primer elemento del mapa se va preguntando si su tipo coincide con el solicitado*/
   while (aux!=NULL){
+
     int respuesta = compararTipo(get_tipo(aux), tipo);
 
     if (respuesta == 0){
@@ -142,9 +150,9 @@ void buscarPokePorTipo (HashMap* mapaClaveNombre,  HashMap* mapaClaveNombrePoke)
         printf("-----------------------------------------\n");
       }
       entrada=1;
-
       alm_pokemon *aux1 = searchMap(mapaClaveNombre, get_nombreP(aux));
       while(aux1!=NULL){
+        //compara el nombre de la pokedex con el del almacenamineto
         if (strcmp(get_nombreA(aux1), get_nombreP(aux))==0)
         {
 
@@ -164,19 +172,27 @@ void buscarPokePorTipo (HashMap* mapaClaveNombre,  HashMap* mapaClaveNombrePoke)
   }
   if (entrada == 0) printf("\nNo existe el tipo solicitado.\n\n");
 }
-
+//funcion que retorna todos los pokemones
+//segun la region
 void buscarPorRegion(HashMap* mapaClaveRegion){
   char *aux = malloc (20*sizeof(char));
   printf("Inserte Region\n");
  	scanf("%s", aux);
+   //si nuestro puntero no es NULL, comparamos
   Pokedex *aComparar  = firstMap(mapaClaveRegion);
+  int control=0;
   if (aComparar != NULL){
-    printf("----------------------------------------------------------\n");
-  printf("Exis Nombre  Tipo     Evo Previa       Evo Sgte       NumPoke  Region\n");
-  printf("--------------------------------------------------------------\n");
+    //si hay datos, se posiciona en el primer pokemon
     while (aComparar != NULL ){
+      //si es igual la region, aumenta variable de control y 
+      //comienza a imprimir
       if (compararRegion(aComparar, aux)==0){
-      
+      control++;
+      if (control==1){
+          printf("----------------------------------------------------------\n");
+        printf("Exis Nombre  Tipo     Evo Previa       Evo Sgte       NumPoke  Region\n");
+        printf("--------------------------------------------------------------\n");
+      }
 
         printf("%d\t", get_existencias(aComparar));
 
@@ -193,19 +209,24 @@ void buscarPorRegion(HashMap* mapaClaveRegion){
         printf("%s\n", get_region(aComparar));
 
       }
+      
       if ( get_i(mapaClaveRegion)== get_size(mapaClaveRegion)-2) break;
+      //avanzamos a siguiente pokemon, tenga o no coincidencia antes
     aComparar = nextMap(mapaClaveRegion);
     }
   }
-  else printf("No existe la region.\n");
+  //Si llega a ser null y no encuentra coincidencias, no existe la region
+  if (control==0) printf("No existe la region.\n");
 
 }
 
+//funcion de busqueda por nombre en almacenamiento Pokedex
 void buscarPorNombrePokedex(HashMap* mapaClaveNombrePoke){
   char *aux = malloc (20*sizeof(char));
   printf("Inserte el nombre del Pokemon a buscar\n");
  	scanf("%s", aux);
   Pokedex *aComparar = searchMap(mapaClaveNombrePoke, aux);
+  //si el pokemon esta en la pokedex, se imprime su informacion
   if (aComparar != NULL){
     printf("------------------------------------------------------\n");
     printf("Exis Nombre   Tipo    Evo Previa    Evo Sgte       NumPoke  Region\n");
@@ -229,7 +250,7 @@ void buscarPorNombrePokedex(HashMap* mapaClaveNombrePoke){
   else printf("No existe el Pokemon.\n");
 
 }
-
+//funcion de busqueda por nombre en Almacenamiento Pokemon 
 void buscarPorNombre(HashMap* mapaClaveNombre){
   char *aux = malloc (sizeof(char));
   printf("Inserte el nombre del Pokemon a buscar\n");
@@ -258,8 +279,11 @@ void buscarPorNombre(HashMap* mapaClaveNombre){
 
 }
 
-
+//funcion para agregar nuevo pokemon manualmente
 void agregarPokemon(HashMap* mapaClaveNombre, HashMap* mapaClaveRegion, HashMap *mapaClaveNombrePoke , Pokedex** vectorPoke){
+  //para evitar errores de memoria, guardaremos memoria y 
+  //crearemos variable para cada parametro
+  //para posteriormente ser ingresado a su struct
   Pokedex *poke ;
   alm_pokemon *alm;
   char *aux = (char*) calloc(1000, sizeof(char));
@@ -281,7 +305,8 @@ void agregarPokemon(HashMap* mapaClaveNombre, HashMap* mapaClaveRegion, HashMap 
   printf("Inserte Nombre: \n");
   scanf("%s", aux);
   strcpy(Nombre, aux);
-
+  //en tipo, dado que es posible ser doble o más
+  //debe el scanf leer hasta el salto de linea, obviando espacios
   printf("Inserte Tipo. Si son mas de dos tipos escriba Tipo1, Tipo2. \n");
   scanf("%[^\n]", aux);
   fgets(aux,30,stdin);
@@ -323,6 +348,7 @@ void agregarPokemon(HashMap* mapaClaveNombre, HashMap* mapaClaveRegion, HashMap 
   scanf("%s", aux);
   strcpy(region,aux);
 
+
   alm = crearAlm(id,Nombre,PC,PS,sexo);
   poke = crearPoke(Nombre, tipo, evoNext, evoPrev, region, NumPokemon);
   insertMap(mapaClaveNombre,get_nombreA(alm), alm);
@@ -357,7 +383,7 @@ void agregarPokemon(HashMap* mapaClaveNombre, HashMap* mapaClaveRegion, HashMap 
 
 
 }
-
+//Muestra todos los pokemones guardados en la pokedex
 void mostrarMapPoke (HashMap *mapa){
  Pokedex * aux =firstMap(mapa);
   
@@ -396,25 +422,6 @@ void mostrarMapPoke (HashMap *mapa){
 
 }
 
-void mostrarMapAlm (HashMap *mapa){
-  alm_pokemon *aux = firstMap(mapa);
-  printf("-----------------------------------------\n");
-  printf("ID     Nombre       PC     PS     Sexo\n");
-  printf("-----------------------------------------\n");
-  while ( aux != NULL ){
-        printf("%s\t", get_id(aux));
-
-        printf("%s\t", get_nombreA(aux));
-
-        printf("%s\t", get_PC(aux));
-
-        printf("%s\t", get_PS(aux));
-
-        printf("%s\n", get_sexo(aux));
-    aux=nextMap(mapa);
-    
-  }
-}
 
 void llenarMapas(HashMap * mapaClaveNombre,HashMap *mapaClaveRegion, HashMap* mapaClaveNombrePoke, Pokedex **vectorPoke){
     int validar;
@@ -425,6 +432,7 @@ void llenarMapas(HashMap * mapaClaveNombre,HashMap *mapaClaveRegion, HashMap* ma
         validar=0;
         if (i>0){
           for (int j=i-1; j>-1;j--){
+            //verifica la existencia del nombre, de ser asi se valida 1
             if (strcmp(get_nombreP(vectorPoke[i]), get_nombreP(vectorPoke[j]))==0) {
               validar=1; 
               break;
@@ -438,10 +446,10 @@ void llenarMapas(HashMap * mapaClaveNombre,HashMap *mapaClaveRegion, HashMap* ma
             
           }
         }
-        
+        /*si no existe el nombre en el almacenamiento su validacion es 0 por lo que se ingresaran sus datos en el mapa pokedex*/
         if (validar==0){
           modExistencias(vectorPoke[i],contador);
-          //printf("clave = %s\n",vectorPoke[i]->region);
+          
           
           insertMap(mapaClaveRegion, get_region(vectorPoke[i]), vectorPoke[i]);
           
@@ -455,15 +463,19 @@ void llenarMapas(HashMap * mapaClaveNombre,HashMap *mapaClaveRegion, HashMap* ma
 
 void tieneComillas (Pokedex * aux2, char quitar){
   char * aux= get_tipo(aux2);
+  //verifica que el primer caracter tenga comillas
   if (aux[0] == '\"'){
     if (aux == NULL) return;
     char * aux1 = aux;
+    
     while (*aux){
       if (*aux != quitar) *aux1++ = *aux;
       aux++;
     }
     *aux1 = '\0';
   }
+  //lo copia hasta que encuentra las comillas
+  //y pasa esta posicion a caracter nulo
   if (aux[strlen(aux)-1] =='\"'){
     if (aux == NULL) return;
     char * aux1 = aux;
@@ -473,38 +485,6 @@ void tieneComillas (Pokedex * aux2, char quitar){
     }
     *aux1 = '\0';
   }
-}
-
-char * buscarTipo (char *line){
-  int cont=0;
-  int cont1=0;
-
-  int i = 0;
-  char * aux = malloc (20*sizeof(char));
-  char * aux2 = malloc (40*sizeof(char));
-  aux2 = NULL;
-  aux = strtok(line, ",");
-  while (aux != NULL){ 
-      if (i == 2){
-          if (aux[0] == '\"'){
-            cont++;
-          }
-          if (cont > 0){
-            if (cont1==0){
-              strcpy(aux2, aux);
-              cont1++;
-            }
-            else strcat(aux2, aux);
-          } 
-          if (aux[strlen(aux)-1] =='\"'){
-            break;
-          }
-          i--;
-      }
-      i++;
-    aux= strtok(NULL, ",");
-  }
-  return aux2;
 }
 
 Pokedex** importarArchivo(FILE *texto, Pokedex** vectorPoke,HashMap * mapaClaveNombre,HashMap * mapaClaveRegion, HashMap* mapaClaveNombrePoke){
@@ -517,6 +497,7 @@ Pokedex** importarArchivo(FILE *texto, Pokedex** vectorPoke,HashMap * mapaClaveN
       linea = (char *) calloc(10000, sizeof(char));
       fgets(linea, 10000, texto);
       if( linea ){
+        //se inicialzan variables que guardaran cada dato entre comas
         char *evoNext = (char*) calloc(1000, sizeof(char));
         char *evoPrev = (char*) calloc(1000, sizeof(char));
         char *Nombre = (char*) calloc(1000, sizeof(char));
@@ -536,7 +517,8 @@ Pokedex** importarArchivo(FILE *texto, Pokedex** vectorPoke,HashMap * mapaClaveN
             strcpy(Nombre,ptr);
             ptr = strtok(NULL, ",");
 
-            
+            /*algoritmo que revisa la existencias de comillas para concatenar
+            los tipos y que asi se guarden en 1 sola variable */
             if (ptr[0]=='\"'){
                strcpy(tipo, ptr);
               while(ptr[strlen(ptr)-1]!='\"'){
@@ -567,10 +549,12 @@ Pokedex** importarArchivo(FILE *texto, Pokedex** vectorPoke,HashMap * mapaClaveN
             ptr = strtok(NULL, ",\n");
 
             strcpy(region,ptr);
-            
+            //condicional para que no se inserte la primera linea del CSV
             if (pasadas > 0){
+              //llamadas a la funcion almacenadas en struct.c
               alm = crearAlm(id,Nombre,PC,PS,sexo);
               poke = crearPoke(Nombre, tipo, evoNext, evoPrev, region, NumPokemon);
+              /* insercion en el mapa siempre, ya que es el almacenamiento*/
               insertMap(mapaClaveNombre,get_nombreA(alm), alm);
               vectorPoke[pasadas-1] = poke;
             }
@@ -593,7 +577,7 @@ int main(){
     FILE * texto = fopen ("pokemon Archivo1.csv", "r");
     //Struct alm_pokemon
     HashMap * mapaClaveNombre = createMap(96 * 2);
-    //HashMap * mapaClaveID = createMap(96 * 2);
+    
     //Struct Pokedex
     HashMap * mapaClaveNombrePoke = createMap(96 * 2);
     HashMap * mapaClaveRegion = createMap(96 * 2);
